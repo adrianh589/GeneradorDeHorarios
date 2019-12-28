@@ -6,15 +6,11 @@ public class Dia {
     private LocalTime horaInicio;
     private LocalTime horaFinal;
 
-    Dia(){
-
-    }
+    Dia() { }
 
     /*Getters y Setters*/
 
-    public String getNombre() {
-        return nombre;
-    }
+    public String getNombre() {  return nombre; }
 
     public void setNombre(String nombre) {
         this.nombre = nombre;

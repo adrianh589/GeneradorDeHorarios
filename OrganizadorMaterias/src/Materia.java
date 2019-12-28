@@ -27,11 +27,11 @@ public class Materia {
         for (int i = 0; i < numdias; i++) {
             Dia diaSemana = new Dia();
             System.out.print("Nombre del dia "+(i+1)+" que la ve: ");
-            diaSemana.setNombre(br.readLine());
+            diaSemana.setNombre(br.readLine().toLowerCase());
             System.out.print("Hora de inicio del dia " + diaSemana.getNombre()+": ");
-            diaSemana.setHoraInicio(op.leerHora(br.readLine()));
+            diaSemana.setHoraInicio(Hora.leerHora(br.readLine()));
             System.out.print("Hora final del dia " + diaSemana.getNombre()+": ");
-            diaSemana.setHoraFinal(op.leerHora(br.readLine()));
+            diaSemana.setHoraFinal(Hora.leerHora(br.readLine()));
             this.dia.add(diaSemana);
         }
     }
