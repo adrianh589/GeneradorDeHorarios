@@ -10,9 +10,15 @@ public class Materia {
     //Atributos
     private String nombre;
     private ArrayList<Dia> dia = new ArrayList<Dia>();
-    private int NRC;
+    private String NRC;
 
     Materia(){};
+
+    Materia(String nombre, Dia dia, String NRC){
+        setNombre(nombre);
+        setDia(dia);
+        setNRC(NRC);
+    }
 
     //Getters y Setters
 
@@ -22,25 +28,15 @@ public class Materia {
 
     public ArrayList<Dia> getDia() { return dia; }
 
-    public void setDia() throws IOException {
-        int numdias = Integer.parseInt(br.readLine());
-        for (int i = 0; i < numdias; i++) {
-            Dia diaSemana = new Dia();
-            System.out.print("Nombre del dia "+(i+1)+" que la ve: ");
-            diaSemana.setNombre(br.readLine().toLowerCase());
-            System.out.print("Hora de inicio del dia " + diaSemana.getNombre()+": ");
-            diaSemana.setHoraInicio(Hora.leerHora(br.readLine()));
-            System.out.print("Hora final del dia " + diaSemana.getNombre()+": ");
-            diaSemana.setHoraFinal(Hora.leerHora(br.readLine()));
-            this.dia.add(diaSemana);
-        }
+    public void setDia(Dia dia) {
+        this.dia.add(dia);
     }
 
-    public int getNRC() {
+    public String getNRC() {
         return NRC;
     }
 
-    public void setNRC(int NRC) {
+    public void setNRC(String NRC) {
         this.NRC = NRC;
     }
 

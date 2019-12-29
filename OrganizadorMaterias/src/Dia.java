@@ -8,6 +8,12 @@ public class Dia {
 
     Dia() { }
 
+    Dia(String nombre, LocalTime horaInicio, LocalTime horaFinal){
+        setNombre(nombre);
+        setHoraInicio(horaInicio);
+        setHoraFinal(horaFinal);
+    }
+
     /*Getters y Setters*/
 
     public String getNombre() {  return nombre; }
