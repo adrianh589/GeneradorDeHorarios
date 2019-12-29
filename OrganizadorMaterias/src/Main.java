@@ -19,21 +19,22 @@ public class Main {
         fisica.setNombre("fis");
         fisica.setDia(new Dia("lunes", LocalTime.of(4,45), LocalTime.of(6,14)));
         fisica.setDia(new Dia("jueves", LocalTime.of(4,45), LocalTime.of(6,14)));
+        fisica.setNRC("1");
         op.guardarMateria(fisica);
 
-        Materia sistemas = new Materia();
-        sistemas.setNombre("sis");
-        sistemas.setDia(new Dia("lunes", LocalTime.of(6,15), LocalTime.of(7,44)));
-        sistemas.setDia(new Dia("miercoles", LocalTime.of(8,30), LocalTime.of(9,59)));
-        op.guardarMateria(sistemas);
-
-        Materia interconectividad = new Materia();
-        interconectividad.setNombre("int");
-        interconectividad.setDia(new Dia("lunes", LocalTime.of(8,30), LocalTime.of(9,59)));
-        interconectividad.setDia(new Dia("viernes", LocalTime.of(8,30), LocalTime.of(9,59)));
-        op.guardarMateria(interconectividad);
+        Materia fisica2 = new Materia();
+        fisica2.setNombre("fis");
+        fisica2.setDia(new Dia("martes", LocalTime.of(6,15), LocalTime.of(7,44)));
+        fisica2.setDia(new Dia("viernes", LocalTime.of(4,45), LocalTime.of(6,14)));
+        fisica2.setNRC("2");
+        op.guardarMateria(fisica2);
 
         Materia etica = new Materia();
+        etica.setNombre("eti");
+        etica.setDia(new Dia("martes", LocalTime.of(6,15), LocalTime.of(7,44)));
+        op.guardarMateria(etica);
+
+        /*Materia etica = new Materia();
         etica.setNombre("eti");
         etica.setDia(new Dia("martes", LocalTime.of(6,15), LocalTime.of(7,44)));
         op.guardarMateria(etica);
@@ -58,10 +59,10 @@ public class Main {
         Materia prueba = new Materia();
         prueba.setNombre("fis");
         prueba.setDia(new Dia("martes", LocalTime.of(4,45), LocalTime.of(6,14)));
-        op.guardarMateria(prueba);
+        op.guardarMateria(prueba);*/
 
         op.imprimirMateriasRegistradas(op.materiasRegistradas);
-        op.generarHorarioAcademico(tablero);
+        op.generarHorarioAcademico(tablero, 0);
     }
 
 }

@@ -1,10 +1,12 @@
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.time.LocalTime;
 import java.util.ArrayList;
 
 public class OperacionesMateria {
 
     public static ArrayList<ArrayList<Materia>> materiasRegistradas = new ArrayList<ArrayList<Materia>>();
+    public static ArrayList<String[][]> posiblesHorarios = new ArrayList<String[][]>();
 
     /**
      * Metodo para capturar la materia
@@ -20,7 +22,18 @@ public class OperacionesMateria {
             System.out.print("Introduzca el nombre de la materia: ");
             materia.setNombre(br.readLine().toLowerCase());
             System.out.print("¿Cuantos dias ve esta materia?: ");
-            //materia.setDia();
+            int numDias = Integer.parseInt(br.readLine());
+
+            for (int i = 0; i < numDias; i++) {
+                System.out.println("Introduzca el nombre del dia "+(i+1));
+                String nombreDia = br.readLine();
+                System.out.println("Introduzca la hora de inicio del dia "+(i+1));
+                LocalTime horaInicio = Hora.leerHora(br.readLine());
+                System.out.println("Introduzca la hora de final del dia "+(i+1));
+                LocalTime horaFinal = Hora.leerHora(br.readLine());
+                materia.setDia(new Dia(nombreDia, horaInicio, horaFinal));
+            }
+
             System.out.print("Introduzca el NRC de la materia: ");
             materia.setNRC(br.readLine());
             materia.imprimirMateriaRegistrada();
@@ -77,48 +90,65 @@ public class OperacionesMateria {
     }
 
 
-    public void generarHorarioAcademico(String[][] tableroHorario) throws IOException {
+    public void generarHorarioAcademico(String[][] tableroHorario, int materiaElegida) throws IOException {
+        String[][] aux = null;
+        if(materiaElegida == materiasRegistradas.size()){//Caso base
+            System.out.println("Horario generado");
+            posiblesHorarios.add(tableroHorario);
+            Horario.mostrarHorario(tableroHorario);
+            return;
+        }else {
+            //******************iterar materia individualmente*******
+            for (int subMateria = 0; subMateria < materiasRegistradas.get(materiaElegida).size(); subMateria++) {
+                //obtener materia individualmente
+                Materia materia = materiasRegistradas.get(materiaElegida).get(subMateria);
+                //introducir materia segun el dia
+                introducirMateriaDiaActual(materiaElegida,subMateria,tableroHorario,materia);
+                //Verificar que se ha introducido
+                //Horario.mostrarHorario(tableroHorario);
+                //Recursividad
+                generarHorarioAcademico(duplicarTablero(tableroHorario), materiaElegida+1);
+                //Limpiar la materia que introducimos
+                tableroHorario = limpiarUltimaMateria(tableroHorario, materia.getNombre());
 
-        //********************OBTENER ARRAY MAESTRO*****************************************************************
-        for (int arrayMaestro = 0; arrayMaestro < materiasRegistradas.size(); arrayMaestro++) {
-            System.out.println(materiasRegistradas.size());
+            }
+        }
+    }
 
-            //******************Obtener materia individualmente*******
-            for (int materiaIndividual = 0; materiaIndividual < materiasRegistradas.get(arrayMaestro).size(); materiaIndividual++) {
+    static String[][] limpiarUltimaMateria(String[][] tableroHorario, String nombreMateria){
+        String[][] aux = duplicarTablero(tableroHorario);
+        for (int i = 1; i < aux.length; i++) {
+            for (int j = 1; j < aux[i].length; j++) {
+                if(aux[i][j].equals(nombreMateria)){
+                    aux[i][j] = " * ";
+                }
+            }
+        }
+        return aux;
+    }
 
-                //*************DATOS MATERIA*********************
-                Materia materia = materiasRegistradas.get(arrayMaestro).get(materiaIndividual);
-                String nombreMateria = materiasRegistradas.get(arrayMaestro).get(materiaIndividual).getNombre();
-                ArrayList<Dia> diaMateria = materiasRegistradas.get(arrayMaestro).get(materiaIndividual).getDia();
-                String NRC = materiasRegistradas.get(arrayMaestro).get(materiaIndividual).getNRC();
-                //**************FIN DATOS MATERIA****************
+    static void introducirMateriaDiaActual(int materiaElegida, int subMateria, String[][] tableroHorario, Materia materia) throws IOException {
+        String nombreMateria = materia.getNombre();
+        ArrayList<Dia> diaMateria = materiasRegistradas.get(materiaElegida).get(subMateria).getDia();
+        for (int diaMatPos = 0; diaMatPos < diaMateria.size(); diaMatPos++) {
+            String diaActMat = diaMateria.get(diaMatPos).getNombre();
+            String horaInicio = materiasRegistradas.get(materiaElegida).get(subMateria).getDia().get(diaMatPos).getHoraInicio().toString();
+            String horaFinal = materiasRegistradas.get(materiaElegida).get(subMateria).getDia().get(diaMatPos).getHoraFinal().toString();
 
-                //***********PARA EL DIA ACTUAL DE LA MATERIA**********************************************************
-                for (int diaMatPos = 0; diaMatPos < diaMateria.size(); diaMatPos++) {
-                    String diaActMat = diaMateria.get(diaMatPos).getNombre();
-                    String horaInicio = materiasRegistradas.get(arrayMaestro).get(materiaIndividual).getDia().get(diaMatPos).getHoraInicio().toString();
-                    String horaFinal = materiasRegistradas.get(arrayMaestro).get(materiaIndividual).getDia().get(diaMatPos).getHoraFinal().toString();
-
-                    boolean cruce = hayCruce(tableroHorario, diaMateria, materia);
-                    if (cruce == true) {
-                        break;
-                    } else {
-                        for (int x = 1; x < tableroHorario.length; x++) {
-                            for (int y = 0; y < tableroHorario[x].length; y++) {
-                                if (tableroHorario[0][y].equals(diaActMat) &&
-                                        Hora.dentroDelRango(tableroHorario[x][0], horaInicio, horaFinal)) {
-                                    tableroHorario[x][y] = nombreMateria;
-                                }
-                            }
+            boolean cruce = hayCruce(tableroHorario, diaMateria, materia);
+            if (cruce == true) {
+                break;
+            } else {//Si no hay cruce se procede a meterla
+                for (int x = 1; x < tableroHorario.length; x++) {
+                    for (int y = 0; y < tableroHorario[x].length; y++) {
+                        if (tableroHorario[0][y].equals(diaActMat) &&
+                                Hora.dentroDelRango(tableroHorario[x][0], horaInicio, horaFinal)) {
+                            tableroHorario[x][y] = nombreMateria;
                         }
                     }
                 }
-                //*********************************FIN DIA ACTUAL DE LA MATERIA********************************************
-
-            }//**************************************FIN MATERIA INDIVIDUAL************************************************
-
-        }//********************************** FIN ARRAY MAESTRO ***********************************************************
-        Horario.mostrarHorario(tableroHorario);
+            }
+        }
     }
 
     static boolean hayCruce(String[][] tablero, ArrayList<Dia> dias, Materia materia) throws IOException {
@@ -159,6 +189,16 @@ public class OperacionesMateria {
             return false;
         }
         return true;
+    }
+
+    static String[][] duplicarTablero(String[][] tablero){
+        String[][] aux = new String[tablero.length][tablero[0].length];
+        for (int i = 0; i < tablero.length; i++) {
+            for (int j = 0; j < tablero[i].length; j++) {
+                aux[i][j] = tablero[i][j];
+            }
+        }
+        return aux;
     }
 
 }
