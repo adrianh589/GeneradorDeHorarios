@@ -6,6 +6,13 @@ import java.util.Stack;
 
 /**
  * Clase principal para pruebas
+ *
+ * ///////////////////PARA TENER EN CUENTA//////////////////////////////////////////////////
+ * Las horas de inicio deben tener digito terminal de 0 o 5
+ * Las horas finales deben tener digito terminal de 4 o 9
+ * Todo esto con el fin de evitar cruces entre las materias
+ * /////////////////////////////////////////////////////////////////////////////////////////
+ *
  * @author adrian
  */
 public class Main {
