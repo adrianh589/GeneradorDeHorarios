@@ -2,6 +2,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Stack;
 
 public class OperacionesMateria {
@@ -26,11 +27,11 @@ public class OperacionesMateria {
             int numDias = Integer.parseInt(br.readLine());
 
             for (int i = 0; i < numDias; i++) {
-                System.out.println("Introduzca el nombre del dia "+(i+1));
+                System.out.println("Introduzca el nombre del dia " + (i + 1));
                 String nombreDia = br.readLine();
-                System.out.println("Introduzca la hora de inicio del dia "+(i+1));
+                System.out.println("Introduzca la hora de inicio del dia " + (i + 1));
                 LocalTime horaInicio = Hora.leerHora(br.readLine());
-                System.out.println("Introduzca la hora de final del dia "+(i+1));
+                System.out.println("Introduzca la hora de final del dia " + (i + 1));
                 LocalTime horaFinal = Hora.leerHora(br.readLine());
                 materia.setDia(new Dia(nombreDia, horaInicio, horaFinal));
             }
@@ -45,6 +46,11 @@ public class OperacionesMateria {
         imprimirMateriasRegistradas(materiasRegistradas);
     }
 
+    /**
+     * Metodo para guardar una materia en un mismo arreglo que tenga el mismo nombre
+     *
+     * @param materia Materia generada
+     */
     public static void guardarMateria(Materia materia) {
 
         boolean encontrada = false;
@@ -92,72 +98,82 @@ public class OperacionesMateria {
 
     /**
      * Metodo con Backtracking que genera los posibles horios con las materias deseadas
+     *
      * @param tableroHorario Tablero academico
      * @param materiaElegida Materia a escoger (de cada grupo)
-     * @param nrcs Pila que guarda los nrc
-     * @param filtro Cantidad de materias minimas que desea registrar en el horario
+     * @param nrcs           Pila que guarda los nrc
      * @throws IOException
      */
     public void generarHorarioAcademico(String[][] tableroHorario, int materiaElegida, Stack<String> nrcs, int filtro) throws IOException {
 
-        if(materiaElegida == materiasRegistradas.size()){//Caso base
-            if(nrcs.size() >= filtro){
-                System.out.println("Horario generado");
+        if (materiaElegida == materiasRegistradas.size()) {//Caso base
+            if(nrcs.size() >= filtro && !horarioRepetido(tableroHorario)) {
                 posiblesHorarios.add(tableroHorario);
+                System.out.println("Horario generado");
+                System.out.println(nrcs);
                 Horario.mostrarHorario(tableroHorario);
                 System.out.println(nrcs);
                 System.out.println("********************************************************\n\n");
             }
             return;
-        }else {
+        } else {
             //******************iterar materia individualmente*******
             for (int subMateria = 0; subMateria < materiasRegistradas.get(materiaElegida).size(); subMateria++) {
                 //obtener materia individualmente
                 Materia materia = materiasRegistradas.get(materiaElegida).get(subMateria);
                 //introducir materia segun el dia
-                boolean asignar = introducirMateriaDiaActual(materiaElegida,subMateria,tableroHorario,materia);
-                if (asignar){
-                    nrcs.add(materia.getNombre()+": "+materia.getNRC());
+                boolean asignar = introducirMateriaDiaActual(materia, tableroHorario);
+                if (asignar) {
+                    nrcs.add(materia.getNombre() + ": " + materia.getNRC());
                 }
 
                 //Recursividad
-                generarHorarioAcademico(duplicarTablero(tableroHorario), materiaElegida+1, recordarNRCS(nrcs), filtro);
+                generarHorarioAcademico(duplicarTablero(tableroHorario), materiaElegida + 1, recordarNRCS(nrcs), filtro);
 
                 //Limpiar la materia que introducimos
                 tableroHorario = limpiarUltimaMateria(tableroHorario, materia.getNombre());
-                if(!nrcs.isEmpty() && asignar == true){
+                if (!nrcs.isEmpty() && asignar == true) {
                     nrcs.pop();
                 }
             }
         }
     }
 
+    static boolean horarioRepetido(String[][] tablero){
+        for (int i = 0; i < posiblesHorarios.size(); i++) {
+            if(Arrays.deepEquals(posiblesHorarios.get(i), tablero)){
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * Metodo para evitar modificaciones en la pila maestra
+     *
      * @param nrcs
      * @return
      */
-    static Stack<String> recordarNRCS(Stack<String> nrcs){
+    static Stack<String> recordarNRCS(Stack<String> nrcs) {
         Stack<String> recordar = new Stack<String>();
-
         for (int i = 0; i < nrcs.size(); i++) {
             recordar.add(nrcs.get(i));
         }
-
         return recordar;
     }
 
     /**
      * Elimina rastro de la ultima materia introducida en el horario
+     *
      * @param tableroHorario Tablero del horario
-     * @param nombreMateria Nombre de la materia elegida
+     * @param nombreMateria  Nombre de la materia elegida
      * @return
      */
-    static String[][] limpiarUltimaMateria(String[][] tableroHorario, String nombreMateria){
+    static String[][] limpiarUltimaMateria(String[][] tableroHorario, String nombreMateria) {
         String[][] aux = duplicarTablero(tableroHorario);
         for (int i = 1; i < aux.length; i++) {
             for (int j = 1; j < aux[i].length; j++) {
-                if(aux[i][j].equals(nombreMateria)){
+                if (aux[i][j].equals(nombreMateria)) {
                     aux[i][j] = " * ";
                 }
             }
@@ -165,51 +181,57 @@ public class OperacionesMateria {
         return aux;
     }
 
-    /**
-     * Metodo que introduce una materia teniendo en cuenta sus dias de disponibilidad
-     * @param materiaElegida Materia del array maestro
-     * @param subMateria Materia del grupo de la misma materia
-     * @param tableroHorario Tablero del horario
-     * @param materia Materia actual
-     * @return Retorna si se intrdujo o no la materia
-     * @throws IOException
-     */
-    static boolean introducirMateriaDiaActual(int materiaElegida, int subMateria, String[][] tableroHorario, Materia materia) throws IOException {
+    static boolean introducirMateriaDiaActual(Materia materia, String[][] tableroHorario) throws IOException {
+        //************DATOS MATERIA******************
         String nombreMateria = materia.getNombre();
-        ArrayList<Dia> diaMateria = materiasRegistradas.get(materiaElegida).get(subMateria).getDia();
-        for (int diaMatPos = 0; diaMatPos < diaMateria.size(); diaMatPos++) {
-            String diaActMat = diaMateria.get(diaMatPos).getNombre();
-            String horaInicio = materiasRegistradas.get(materiaElegida).get(subMateria).getDia().get(diaMatPos).getHoraInicio().toString();
-            String horaFinal = materiasRegistradas.get(materiaElegida).get(subMateria).getDia().get(diaMatPos).getHoraFinal().toString();
-
-            boolean cruce = hayCruce(tableroHorario, diaMateria, materia);
-            if (cruce == true) {
-                //Si no se pudo meter
-                return  false;
-            } else {//Si no hay cruce se procede a meterla
-                for (int x = 1; x < tableroHorario.length; x++) {
-                    for (int y = 0; y < tableroHorario[x].length; y++) {
-                        if (tableroHorario[0][y].equals(diaActMat) &&
-                                Hora.dentroDelRango(tableroHorario[x][0], horaInicio, horaFinal)) {
-                                tableroHorario[x][y] = nombreMateria;
-                        }
-                    }
-                }
-
-            }
+        ArrayList<Dia> diaMateria = materia.getDia();
+        //********************************************
+        if (hayCruce(tableroHorario, materia) == true) {
+            //Si hay cruce no se mete
+            return false;
         }
+
+        for (int diaMatPos = 0; diaMatPos < diaMateria.size(); diaMatPos++) {
+            //****************DATOS DEL DIA ACTUAL DE LA MATERIA***************************
+            String diaActMat = diaMateria.get(diaMatPos).getNombre();
+            String horaInicio = materia.getDia().get(diaMatPos).getHoraInicio().toString();
+            String horaFinal = materia.getDia().get(diaMatPos).getHoraFinal().toString();
+            //*****************************************************************************
+
+            int posJdia = posicionDelDia(tableroHorario, diaActMat);
+
+            for (int d = 1; d < tableroHorario.length; d++) {
+                if (Hora.dentroDelRango(tableroHorario[d][0], horaInicio, horaFinal)) {
+                    tableroHorario[d][posJdia] = nombreMateria;
+                }
+            }
+
+        }
+
         return true;//Si se metio la materia, retornamos true
     }
 
+    static int posicionDelDia(String[][] tablero, String dia) {
+        int pos = -1;
+        for (int i = 0; i < tablero[0].length; i++) {
+            if (tablero[0][i].equals(dia)) {
+                pos = i;
+                break;
+            }
+        }
+        return pos;
+    }
+
     /**
-     * Metodo que indica si hay cruce de horarios
-     * @param tablero Tablero academico
-     * @param dias Dias de la materia elegida
-     * @param materia Materia elegida
+     * @param tablero
+     * @param materia
      * @return
      * @throws IOException
      */
-    static boolean hayCruce(String[][] tablero, ArrayList<Dia> dias, Materia materia) throws IOException {
+    static boolean hayCruce(String[][] tablero, Materia materia) throws IOException {
+
+        ArrayList<Dia> dias = materia.getDia();
+        String nombreMateria = materia.getNombre();
 
         for (int numDia = 0; numDia < dias.size(); numDia++) {
 
@@ -226,15 +248,13 @@ public class OperacionesMateria {
             }
 
             //Comprobar que no se cruce con ninguna materia
-            for (int i = 1; i < tablero.length; i++) {
-                for (int j = 1; j < tablero[i].length; j++) {
-                    if (tablero[0][j].equals(nombreDia) &&
-                            !tablero[i][j].equals(" * ") &&
-                            !tablero[i][j].equals(materia.getNombre()) &&
-                            Hora.dentroDelRango(tablero[i][0], horaInicio, horaFinal)) {
-                        //System.out.println("La materia " + materia.getNombre() + " se cruza con la materia " + tablero[i][j] + " el dia " + nombreDia);
-                        return true;
-                    }
+            int posJdia = posicionDelDia(tablero, nombreDia);
+
+            for (int d = 1; d < tablero.length; d++) {
+                if (Hora.dentroDelRango(tablero[d][0], horaInicio, horaFinal) &&
+                        !tablero[d][posJdia].equals(" * ")) {
+                    //System.out.println("La materia " + materia.getNombre() + " se cruza con la materia " + tablero[d][posJdia] + " el dia " + nombreDia);
+                    return true;
                 }
             }
 
@@ -244,8 +264,9 @@ public class OperacionesMateria {
 
     /**
      * Metodo que indica si una materia se encuentra dentro del rango del usuario segun el dia
+     *
      * @param horaInicio hora de inicio de la materia
-     * @param horaFinal hora final de la materia
+     * @param horaFinal  hora final de la materia
      * @param tablero
      * @return
      * @throws IOException
@@ -259,10 +280,11 @@ public class OperacionesMateria {
 
     /**
      * Metodo que duplica el tablero para evitar modificaciones
+     *
      * @param tablero
      * @return
      */
-    static String[][] duplicarTablero(String[][] tablero){
+    static String[][] duplicarTablero(String[][] tablero) {
         String[][] aux = new String[tablero.length][tablero[0].length];
         for (int i = 0; i < tablero.length; i++) {
             for (int j = 0; j < tablero[i].length; j++) {
